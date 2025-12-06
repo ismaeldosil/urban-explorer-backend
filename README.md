@@ -7,19 +7,19 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Deno](https://img.shields.io/badge/Deno-000000?logo=deno&logoColor=white)](https://deno.land/)
 
-> Backend serverless para Urban Explorer con Supabase
+> Serverless backend for Urban Explorer with Supabase
 
-## Acerca del Proyecto
+## About The Project
 
-Este repositorio contiene toda la infraestructura de backend para **Urban Explorer**, una app de exploración urbana gamificada. Incluye:
+This repository contains the entire backend infrastructure for **Urban Explorer**, a gamified urban exploration app. It includes:
 
-- **Base de datos PostgreSQL** con PostGIS para consultas geoespaciales
-- **Autenticación** con email, Google y Apple
-- **Edge Functions** para lógica de negocio serverless
-- **Storage** para imágenes de usuarios y lugares
-- **Row Level Security (RLS)** para seguridad a nivel de fila
+- **PostgreSQL database** with PostGIS for geospatial queries
+- **Authentication** with email, Google, and Apple
+- **Edge Functions** for serverless business logic
+- **Storage** for user and location images
+- **Row Level Security (RLS)** for row-level data protection
 
-## Arquitectura
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -43,20 +43,20 @@ Este repositorio contiene toda la infraestructura de backend para **Urban Explor
 
 ## Tech Stack
 
-| Tecnología | Propósito |
-|------------|-----------|
+| Technology | Purpose |
+|------------|---------|
 | [Supabase](https://supabase.com/) | Backend as a Service |
-| [PostgreSQL](https://www.postgresql.org/) | Base de datos relacional |
-| [PostGIS](https://postgis.net/) | Extensión geoespacial |
-| [Deno](https://deno.land/) | Runtime para Edge Functions |
-| [TypeScript](https://www.typescriptlang.org/) | Lenguaje tipado |
+| [PostgreSQL](https://www.postgresql.org/) | Relational database |
+| [PostGIS](https://postgis.net/) | Geospatial extension |
+| [Deno](https://deno.land/) | Edge Functions runtime |
+| [TypeScript](https://www.typescriptlang.org/) | Typed language |
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 urban-explorer-backend/
 ├── supabase/
-│   ├── migrations/           # Migraciones SQL
+│   ├── migrations/           # SQL migrations
 │   │   ├── 00001_initial_schema.sql
 │   │   ├── 00002_rls_policies.sql
 │   │   └── 00003_postgis_functions.sql
@@ -64,13 +64,13 @@ urban-explorer-backend/
 │   │   ├── get-nearby-locations/
 │   │   ├── update-location-stats/
 │   │   └── get-user-feed/
-│   └── seed.sql              # Datos iniciales
+│   └── seed.sql              # Initial data
 ├── .github/
 │   └── workflows/            # CI/CD
 └── README.md
 ```
 
-## Schema de Base de Datos
+## Database Schema
 
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
@@ -103,55 +103,55 @@ urban-explorer-backend/
 
 ## Edge Functions
 
-| Función | Descripción | Endpoint |
-|---------|-------------|----------|
-| `get-nearby-locations` | Busca lugares cercanos usando PostGIS | `POST /functions/v1/get-nearby-locations` |
-| `update-location-stats` | Actualiza rating y conteo de reviews | `POST /functions/v1/update-location-stats` |
-| `get-user-feed` | Feed personalizado de actividad | `POST /functions/v1/get-user-feed` |
+| Function | Description | Endpoint |
+|----------|-------------|----------|
+| `get-nearby-locations` | Find nearby places using PostGIS | `POST /functions/v1/get-nearby-locations` |
+| `update-location-stats` | Update rating and review count | `POST /functions/v1/update-location-stats` |
+| `get-user-feed` | Personalized activity feed | `POST /functions/v1/get-user-feed` |
 
-## Instalación
+## Installation
 
-### Prerrequisitos
+### Prerequisites
 
-- [Supabase CLI](https://supabase.com/docs/guides/cli) instalado
-- [Docker](https://www.docker.com/) (para desarrollo local)
+- [Supabase CLI](https://supabase.com/docs/guides/cli) installed
+- [Docker](https://www.docker.com/) (for local development)
 
-### Desarrollo Local
+### Local Development
 
-1. **Clonar el repositorio**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/ismaeldosil/urban-explorer-backend.git
    cd urban-explorer-backend
    ```
 
-2. **Iniciar Supabase local**
+2. **Start local Supabase**
    ```bash
    supabase start
    ```
 
-3. **Aplicar migraciones**
+3. **Apply migrations**
    ```bash
    supabase db reset
    ```
 
-4. **Ejecutar Edge Functions**
+4. **Run Edge Functions**
    ```bash
    supabase functions serve
    ```
 
-### Variables de Entorno
+### Environment Variables
 
-Después de `supabase start`, copia estos valores al frontend:
+After `supabase start`, copy these values to the frontend:
 
 ```bash
 SUPABASE_URL=http://localhost:54321
-SUPABASE_ANON_KEY=<tu-anon-key>
-SUPABASE_SERVICE_ROLE_KEY=<tu-service-role-key>
+SUPABASE_ANON_KEY=<your-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 ```
 
-## Deploy
+## Deployment
 
-### Migraciones
+### Migrations
 
 ```bash
 supabase db push
@@ -160,40 +160,40 @@ supabase db push
 ### Edge Functions
 
 ```bash
-# Deploy todas las funciones
+# Deploy all functions
 supabase functions deploy
 
-# Deploy función específica
+# Deploy specific function
 supabase functions deploy get-nearby-locations
 ```
 
-## Seguridad
+## Security
 
 ### Row Level Security (RLS)
 
-Todas las tablas tienen RLS habilitado con políticas para:
+All tables have RLS enabled with policies for:
 
-- **SELECT**: Datos públicos o propios del usuario
-- **INSERT**: Solo datos propios
-- **UPDATE**: Solo datos propios
-- **DELETE**: Solo datos propios
+- **SELECT**: Public data or user's own data
+- **INSERT**: Own data only
+- **UPDATE**: Own data only
+- **DELETE**: Own data only
 
-### Autenticación
+### Authentication
 
-- JWT tokens con expiración de 1 hora
-- Refresh tokens con expiración de 7 días
-- OAuth con Google y Apple
+- JWT tokens with 1-hour expiration
+- Refresh tokens with 7-day expiration
+- OAuth with Google and Apple
 
-## Repositorios Relacionados
+## Related Repositories
 
-| Repositorio | Descripción |
-|-------------|-------------|
-| [urban-explorer-frontend](https://github.com/ismaeldosil/urban-explorer-frontend) | App móvil Ionic |
-| [urban-explorer-docs](https://github.com/ismaeldosil/urban-explorer-docs) | Documentación |
+| Repository | Description |
+|------------|-------------|
+| [urban-explorer-frontend](https://github.com/ismaeldosil/urban-explorer-frontend) | Ionic mobile app |
+| [urban-explorer-docs](https://github.com/ismaeldosil/urban-explorer-docs) | Documentation |
 
-## Licencia
+## License
 
-Este proyecto está bajo la Licencia MIT. Ver [LICENSE](LICENSE) para más detalles.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
