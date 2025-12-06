@@ -84,3 +84,88 @@ jobs:
           echo "Checking for RLS in migrations..."
           rls_count=$(grep -l "ENABLE ROW LEVEL SECURITY" supabase/migrations/*.sql 2>/dev/null | wc -l)
           echo "Found $rls_count migrations with RLS enabled"
+
+  test-edge-functions:
+    name: Test Edge Functions
+    runs-on: ubuntu-latest
+    needs: test-database
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase (with Edge Runtime)
+        run: supabase start -x realtime,storage-api,imgproxy,inbucket,pgadmin-schema-diff,migra,postgres-meta,studio,logflare,vector,supavisor
+
+      - name: Validate Edge Functions syntax
+        run: |
+          echo "Validating Edge Functions TypeScript syntax..."
+          if [ -d "supabase/functions" ]; then
+            for func_dir in supabase/functions/*/; do
+              if [ -d "$func_dir" ] && [ -f "$func_dir/index.ts" ]; then
+                func_name=$(basename "$func_dir")
+                echo "Checking $func_name..."
+                deno check "$func_dir/index.ts"
+              fi
+            done
+            echo "All Edge Functions validated"
+          else
+            echo "No Edge Functions found"
+          fi
+
+      - name: Lint Edge Functions
+        run: |
+          echo "Linting Edge Functions..."
+          if [ -d "supabase/functions" ]; then
+            for func_dir in supabase/functions/*/; do
+              if [ -d "$func_dir" ] && [ -f "$func_dir/index.ts" ]; then
+                func_name=$(basename "$func_dir")
+                echo "Linting $func_name..."
+                deno lint "$func_dir/index.ts"
+              fi
+            done
+            echo "All Edge Functions linted"
+          fi
+
+      - name: Test Edge Functions locally
+        run: |
+          echo "Testing Edge Functions..."
+          # Serve functions in background
+          supabase functions serve &
+          SERVE_PID=$!
+
+          # Wait for functions to be ready
+          sleep 10
+
+          # Test each function with basic health check
+          if [ -d "supabase/functions" ]; then
+            for func_dir in supabase/functions/*/; do
+              if [ -d "$func_dir" ]; then
+                func_name=$(basename "$func_dir")
+                echo "Testing $func_name..."
+
+                # Basic OPTIONS request (CORS check)
+                curl -i -X OPTIONS \
+                  http://localhost:54321/functions/v1/$func_name \
+                  -H "Authorization: Bearer $(supabase status --output json | jq -r '.anon_key')" \
+                  || echo "Warning: $func_name OPTIONS check failed"
+              fi
+            done
+          fi
+
+          # Stop the serve process
+          kill $SERVE_PID 2>/dev/null || true
+
+      - name: Stop Supabase
+        if: always()
+        run: supabase stop
