@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+
+# Build output (will be generated in container)
+dist
+
+# Development files
+.claude
+CLAUDE.md
+.github
+.git
+.gitignore
+
+# Tests
+tests
+*.test.ts
+*.spec.ts
+coverage
+vitest.config.ts
+
+# Linting
+.eslintrc.json
+
+# Supabase Edge Functions (Deno - not needed for Node.js backend)
+supabase
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docs
+README.md
+CHANGELOG.md
+*.md
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
