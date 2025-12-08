@@ -1,0 +1,10 @@
+# Ignore broken symlinks and development files
+.claude
+CLAUDE.md
+.github
+tests
+*.test.ts
+*.spec.ts
+coverage
+.eslintrc.json
+vitest.config.ts
