@@ -1,1 +1,0 @@
-../urban-explorer-docs/backend/CLAUDE.md
