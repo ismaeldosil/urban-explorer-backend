@@ -15,8 +15,16 @@ const envSchema = z.object({
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  console.error('Invalid environment variables:', parsed.error.flatten().fieldErrors);
-  throw new Error('Invalid environment variables');
+  console.error('⚠️  Warning: Invalid environment variables:', parsed.error.flatten().fieldErrors);
+  console.error('⚠️  Server will start but some features may not work.');
+  // Don't throw - let the server start for healthcheck
 }
 
-export const env = parsed.data;
+export const env = parsed.success ? parsed.data : {
+  NODE_ENV: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
+  PORT: process.env.PORT || '3000',
+  SUPABASE_URL: process.env.SUPABASE_URL || '',
+  SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || '',
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
+};

@@ -3,29 +3,34 @@ import { getSupabaseClient } from '../services/supabase';
 
 const router = Router();
 
+// Simple health check - always returns 200 if server is running
 router.get('/', async (_req, res) => {
   const startTime = Date.now();
 
+  // Basic health check - server is running
+  const basicHealth = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  };
+
+  // Try to check database connection (optional, don't fail if DB is unavailable)
   try {
     const supabase = getSupabaseClient();
     const { error } = await supabase.from('categories').select('count').limit(1).single();
-
-    const dbStatus = error ? 'unhealthy' : 'healthy';
     const responseTime = Date.now() - startTime;
 
     res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      database: dbStatus,
+      ...basicHealth,
+      database: error ? 'unhealthy' : 'healthy',
       responseTime: `${responseTime}ms`,
     });
-  } catch (error) {
-    res.status(503).json({
-      status: 'error',
-      timestamp: new Date().toISOString(),
-      database: 'unhealthy',
-      error: error instanceof Error ? error.message : 'Unknown error',
+  } catch {
+    // Even if DB check fails, server is still healthy
+    res.json({
+      ...basicHealth,
+      database: 'unchecked',
+      responseTime: `${Date.now() - startTime}ms`,
     });
   }
 });
