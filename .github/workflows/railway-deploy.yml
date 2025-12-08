@@ -12,6 +12,7 @@ jobs:
   deploy:
     name: Deploy to Railway
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -33,6 +34,17 @@ jobs:
         run: npm install -g @railway/cli
 
       - name: Deploy to Railway
-        run: railway up --service urban-explorer-backend
+        run: railway up --service urban-explorer-backend --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Deployment Info
+        run: |
+          echo "🚀 Deployment initiated to Railway"
+          echo "📋 Project: https://railway.com/project/22b43ceb-5fb6-4486-b707-09d353c6b40a"
+          echo ""
+          echo "⚠️  Note: Make sure environment variables are configured in Railway dashboard:"
+          echo "   - SUPABASE_URL"
+          echo "   - SUPABASE_ANON_KEY"
+          echo "   - NODE_ENV=production"
+          echo "   - PORT (Railway provides this automatically)"
