@@ -1,202 +1,90 @@
 # Urban Explorer Backend
 
 [![CI](https://github.com/ismaeldosil/urban-explorer-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/ismaeldosil/urban-explorer-backend/actions/workflows/ci.yml)
-[![Deploy](https://github.com/ismaeldosil/urban-explorer-backend/actions/workflows/deploy.yml/badge.svg)](https://github.com/ismaeldosil/urban-explorer-backend/actions/workflows/deploy.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Deploy](https://github.com/ismaeldosil/urban-explorer-backend/actions/workflows/railway-deploy.yml/badge.svg)](https://github.com/ismaeldosil/urban-explorer-backend/actions/workflows/railway-deploy.yml)
+[![Railway](https://img.shields.io/badge/Railway-0B0D0E?logo=railway&logoColor=white)](https://railway.app/)
 [![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Deno](https://img.shields.io/badge/Deno-000000?logo=deno&logoColor=white)](https://deno.land/)
 
-> Serverless backend for Urban Explorer with Supabase
+> API Gateway for Urban Explorer - Node.js/Express + Supabase
 
-## About The Project
+## Quick Start
 
-This repository contains the entire backend infrastructure for **Urban Explorer**, a gamified urban exploration app. It includes:
+```bash
+# Install dependencies
+npm install
 
-- **PostgreSQL database** with PostGIS for geospatial queries
-- **Authentication** with email, Google, and Apple
-- **Edge Functions** for serverless business logic
-- **Storage** for user and location images
-- **Row Level Security (RLS)** for row-level data protection
+# Copy environment file
+cp .env.example .env
+# Edit .env with your Supabase credentials
 
-## Architecture
+# Development
+npm run dev
 
+# Build
+npm run build
+
+# Production
+npm start
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        SUPABASE CLOUD                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐ │
-│  │    Auth     │  │   Storage   │  │    Edge Functions       │ │
-│  │  (JWT/OAuth)│  │  (Images)   │  │  (Deno/TypeScript)      │ │
-│  └──────┬──────┘  └──────┬──────┘  └───────────┬─────────────┘ │
-│         │                │                     │               │
-│         └────────────────┼─────────────────────┘               │
-│                          │                                     │
-│                    ┌─────┴─────┐                               │
-│                    │ PostgreSQL │                               │
-│                    │ + PostGIS  │                               │
-│                    └───────────┘                               │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | API info |
+| GET | `/api/health` | Health check |
+| GET | `/api/locations/nearby` | Get nearby locations |
+| GET | `/api/locations/search` | Search locations |
+| GET | `/api/locations/:id` | Get location details |
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `PORT` | Server port (default: 3000) | No |
+| `NODE_ENV` | Environment (development/production) | No |
+| `SUPABASE_URL` | Supabase project URL | Yes |
+| `SUPABASE_ANON_KEY` | Supabase anon key | Yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key | No |
+| `CORS_ORIGIN` | Allowed origins (comma-separated) | No |
+
+## Deployment
+
+### Railway (Recommended)
+
+1. Login to Railway: `railway login`
+2. Link project: `railway link`
+3. Deploy: `railway up`
+
+Or via GitHub Actions:
+1. Add `RAILWAY_TOKEN` secret in GitHub
+2. Push to `main` branch
+
+### Manual Deployment
+
+```bash
+npm run build
+npm start
 ```
 
 ## Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| [Supabase](https://supabase.com/) | Backend as a Service |
-| [PostgreSQL](https://www.postgresql.org/) | Relational database |
-| [PostGIS](https://postgis.net/) | Geospatial extension |
-| [Deno](https://deno.land/) | Edge Functions runtime |
-| [TypeScript](https://www.typescriptlang.org/) | Typed language |
+- **Node.js** - Runtime
+- **Express** - Web framework
+- **TypeScript** - Type safety
+- **Supabase** - Backend as a Service
+- **Zod** - Schema validation
 
-## Project Structure
+## Documentation
 
-```
-urban-explorer-backend/
-├── supabase/
-│   ├── migrations/           # SQL migrations
-│   │   ├── 00001_initial_schema.sql
-│   │   ├── 00002_rls_policies.sql
-│   │   └── 00003_postgis_functions.sql
-│   ├── functions/            # Edge Functions
-│   │   ├── get-nearby-locations/
-│   │   ├── update-location-stats/
-│   │   └── get-user-feed/
-│   └── seed.sql              # Initial data
-├── .github/
-│   └── workflows/            # CI/CD
-└── README.md
-```
+All documentation is centralized in **[urban-explorer-docs](../urban-explorer-docs/)**:
 
-## Database Schema
-
-```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│   profiles   │     │  locations   │     │   reviews    │
-├──────────────┤     ├──────────────┤     ├──────────────┤
-│ id (uuid)    │     │ id (uuid)    │     │ id (uuid)    │
-│ username     │────▶│ category_id  │◀────│ location_id  │
-│ email        │     │ name         │     │ user_id      │
-│ avatar_url   │     │ coordinates  │     │ rating       │
-│ bio          │     │ rating       │     │ comment      │
-│ location     │     │ review_count │     │ photos[]     │
-└──────────────┘     └──────────────┘     └──────────────┘
-        │                   │                    │
-        │            ┌──────┴──────┐             │
-        │            ▼             ▼             │
-        │     ┌────────────┐ ┌──────────┐        │
-        │     │ categories │ │ favorites │◀──────┘
-        │     └────────────┘ └──────────┘
-        │
-        ▼
-┌──────────────┐     ┌──────────────┐
-│   badges     │     │ user_badges  │
-├──────────────┤     ├──────────────┤
-│ id (uuid)    │◀────│ user_id      │
-│ name         │     │ badge_id     │
-│ description  │     │ unlocked_at  │
-│ icon         │     └──────────────┘
-└──────────────┘
-```
-
-## Edge Functions
-
-| Function | Description | Endpoint |
-|----------|-------------|----------|
-| `get-nearby-locations` | Find nearby places using PostGIS | `POST /functions/v1/get-nearby-locations` |
-| `update-location-stats` | Update rating and review count | `POST /functions/v1/update-location-stats` |
-| `get-user-feed` | Personalized activity feed | `POST /functions/v1/get-user-feed` |
-
-## Installation
-
-### Prerequisites
-
-- [Supabase CLI](https://supabase.com/docs/guides/cli) installed
-- [Docker](https://www.docker.com/) (for local development)
-
-### Local Development
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/ismaeldosil/urban-explorer-backend.git
-   cd urban-explorer-backend
-   ```
-
-2. **Start local Supabase**
-   ```bash
-   supabase start
-   ```
-
-3. **Apply migrations**
-   ```bash
-   supabase db reset
-   ```
-
-4. **Run Edge Functions**
-   ```bash
-   supabase functions serve
-   ```
-
-### Environment Variables
-
-After `supabase start`, copy these values to the frontend:
-
-```bash
-SUPABASE_URL=http://localhost:54321
-SUPABASE_ANON_KEY=<your-anon-key>
-SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
-```
-
-## Deployment
-
-### Migrations
-
-```bash
-supabase db push
-```
-
-### Edge Functions
-
-```bash
-# Deploy all functions
-supabase functions deploy
-
-# Deploy specific function
-supabase functions deploy get-nearby-locations
-```
-
-## Security
-
-### Row Level Security (RLS)
-
-All tables have RLS enabled with policies for:
-
-- **SELECT**: Public data or user's own data
-- **INSERT**: Own data only
-- **UPDATE**: Own data only
-- **DELETE**: Own data only
-
-### Authentication
-
-- JWT tokens with 1-hour expiration
-- Refresh tokens with 7-day expiration
-- OAuth with Google and Apple
-
-## Related Repositories
-
-| Repository | Description |
-|------------|-------------|
-| [urban-explorer-frontend](https://github.com/ismaeldosil/urban-explorer-frontend) | Ionic mobile app |
-| [urban-explorer-docs](https://github.com/ismaeldosil/urban-explorer-docs) | Documentation |
+| Document | Description |
+|----------|-------------|
+| [Full README](../urban-explorer-docs/backend/FULL-README.md) | Complete project documentation |
+| [Functions](../urban-explorer-docs/backend/functions/FUNCTIONS-README.md) | Edge Functions guide |
+| [CHANGELOG](../urban-explorer-docs/backend/CHANGELOG.md) | Version history |
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-<p align="center">
-  Powered by <img src="https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white" alt="Supabase" height="20">
-</p>
+MIT License - See [LICENSE](LICENSE) for details.

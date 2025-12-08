@@ -8,6 +8,24 @@ Thumbs.db
 *.swp
 *.swo
 
+# Node.js
+node_modules/
+dist/
+coverage/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Build
+*.tsbuildinfo
+
 # Generated
 *.pyc
 __pycache__/
