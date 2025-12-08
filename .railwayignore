@@ -8,3 +8,6 @@ tests
 coverage
 .eslintrc.json
 vitest.config.ts
+
+# Ignore Supabase Edge Functions (Deno) - we only need Node.js backend
+supabase
