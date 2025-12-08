@@ -74,10 +74,14 @@ router.get('/search', async (req: Request, res: Response, next: NextFunction) =>
       throw error;
     }
 
-    const { q, lat, lng, limit } = parsed.data;
+    const { q, lat: _lat, lng: _lng, limit } = parsed.data;
     const supabase = getSupabaseClient();
 
-    let query = supabase
+    // TODO: Use lat/lng for geo-based search ranking when implemented
+    void _lat;
+    void _lng;
+
+    const query = supabase
       .from('locations')
       .select('*')
       .or(`name.ilike.%${q}%,description.ilike.%${q}%,address.ilike.%${q}%`)
